@@ -22,6 +22,7 @@ ui <- dashboardPage(skin = "black",
                     dashboardSidebar(width = 350,
                                      sidebarMenu(#menuItem("", tabName = "home", icon = icon("home")),
                                        menuItem("Select sample", tabName = "tab1"),
+                                       menuItem("Descriptives", tabName = "tab2"),
                                        menuItem("Disclaimer", tabName = "Disclaimer"), 
                                        HTML("<br><br><br><br><br><br><br><br><br><br><br><br><br><br>"), 
                                        img(src= "logo.png", align = "left")
@@ -129,7 +130,72 @@ ui <- dashboardPage(skin = "black",
                                   ),
                                   box(
                                     numericInput("n", "Sample size:", 20, min = 5, max = 100, step = 5, width = 200),
-                                    selectInput("sample_type", "Type of sample:", c("Convenience", "Snowball", "Purposive"), selectize = TRUE, width = 200),
+                                    selectInput("sample_type", "Type of sample:", c("Convenience", "Snowball", "Purposive", "Systematic",
+                                                                                    "Simple random",
+                                                                                    "Stratified", 
+                                                                                    "Cluster",
+                                                                                    "Multistage"), selectize = TRUE, width = 200),
+                                    conditionalPanel(
+                                      condition = "input.sample_type == 'Purposive'",
+                                      sliderInput("conv_percent", "Percentage convenience sample:", min = 0, max = 1, value = .6, step = .1, width = 200)
+                                    ),
+                                    conditionalPanel(
+                                      condition = "input.sample_type == 'Systematic'",
+                                      uiOutput("skip_n_ui")
+                                    ),
+                                    conditionalPanel(
+                                      condition = "input.sample_type == 'Cluster'|input.sample_type == 'Multistage'",
+                                      uiOutput("num_clusters_ui")
+                                    ),
+                                    conditionalPanel(
+                                      condition = "input.sample_type == 'Multistage'",
+                                      uiOutput("multistage_ui")
+                                    ),
+                                    conditionalPanel(
+                                      condition = "input.sample_type == 'Stratified'",
+                                      uiOutput("stratified_ui")
+                                    ),
+                                    fluidRow(
+                                      column(1,
+                                             conditionalPanel(
+                                               condition = "input.sample_type == 'Stratified' & input.stratified == 'Shape'",
+                                               uiOutput("shape1_ui")
+                                             )),
+                                      column(1,
+                                             conditionalPanel(
+                                               condition = "input.sample_type == 'Stratified' & input.stratified == 'Shape'",
+                                               uiOutput("shape2_ui")
+                                             )),
+                                      column(10)
+                                    ),
+                                    fluidRow(
+                                      column(1,
+                                             conditionalPanel(
+                                               condition = "input.sample_type == 'Stratified' & input.stratified == 'Color'",
+                                               uiOutput("color1_ui")
+                                             )),
+                                      column(1,
+                                             conditionalPanel(
+                                               condition = "input.sample_type == 'Stratified' & input.stratified == 'Color'",
+                                               uiOutput("color2_ui")
+                                             )),
+                                      column(1,
+                                             conditionalPanel(
+                                               condition = "input.sample_type == 'Stratified' & input.stratified == 'Color'",
+                                               uiOutput("color3_ui")
+                                             )),
+                                      column(1,
+                                             conditionalPanel(
+                                               condition = "input.sample_type == 'Stratified' & input.stratified == 'Color'",
+                                               uiOutput("color4_ui")
+                                             )),
+                                      column(1,
+                                             conditionalPanel(
+                                               condition = "input.sample_type == 'Stratified' & input.stratified == 'Color'",
+                                               uiOutput("color5_ui")
+                                             )),
+                                      column(7)
+                                    ),
                                     actionButton("do_sample", "Draw sample"),
                                     actionButton("reset", "Reset population"),
                                     width = 12,
@@ -145,8 +211,42 @@ ui <- dashboardPage(skin = "black",
                                     #             )
                                   ) # end box
                                 ) # end fluidrow)
+                        ),
+                        tabItem(tabName = "tab2",
+                                fluidRow(
+                                  box(
+                                    width = 12,
+                                    align = "left",
+                                    h4("Sampling from a population"),
+                                    h5(
+                                      "The colorful objects in the plot represent cases in the population. The researcher is located somewhere in the population. The closer cases are to the researcher, the easier they are to reach. Select one of the different sampling methods to see which cases would be included."
+                                    ),
+                                    h5(
+                                      "To see how well the selected sample captures the population as a whole, click on the tab 'Descriptives'"
+                                    ),
+                                    # fluidRow(
+                                    #   column(width = 6,
+                                    #          tableOutput("tbl_sample_props")),
+                                    #   column(width = 6,
+                                    #          tableOutput("tbl_pop_props"))
+                                    # ),
+                                    
+                                    plotOutput(
+                                      "plot_descriptives",
+                                      width = 600,
+                                      height = 400#,
+                                    ),
+                                    fluidRow(
+                                      column(2, checkboxInput("plot_shape", "Plot shapes", TRUE)),
+                                      column(2, checkboxInput("plot_color", "Plot colors", TRUE)),
+                                      column(2, checkboxInput("plot_perc", "Show percentages")),
+                                      column(6)
+                                    ),
+                                    actionButton("plot_descriptives", "Plot descriptives")
+                                    
+                                  )
+                                )
                         )
-                        
                                 ) # end tabItems
                       ) # end dashboardbody
                       ) # end dashboardpage
